@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+###############################################################################
+# Tanimoto Similarity test using RDKit and Zinc15 database
+# Joseph D'Emanuele
+
+import urllib
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
+from rdkit.Chem import Draw
+
+
+###############################################################################
+# This runs through the molecules in a SMILES file and returns
+# a list of Molecules.
+def process_smiles_file(filename):
+    smiles = {}
+    with open(filename, "r") as infile:
+        infile.readline()  # skip header
+        for line in infile:
+            parts = line.split()
+            m = Chem.MolFromSmiles(parts[0])
+            if m is None:
+                continue
+            smiles[parts[1]] = m
+    return smiles
+
+###############################################################################
+# similarity test
+
+# download smiles file
+urllib.urlretrieve("http://files.docking.org/2D/AA/AAAA.smi", "AAAA.smi")
+
+# process file and create a list of Molecules
+molecules = process_smiles_file("AAAA.smi")
+
+# use first molecule as query fingerprint
+fp_query = AllChem.GetMorganFingerprintAsBitVect(molecules[molecules.keys()[0]], 2)
+
+# dictionary to keep similarity index
+similarities = {}
+
+# compute Tanimoto similarity for all molecules in our file
+for moleculeKey in molecules.keys():
+    fp2 = AllChem.GetMorganFingerprintAsBitVect(molecules[moleculeKey], 2)
+    similarity = DataStructs.FingerprintSimilarity(fp_query, fp2)
+    similarities[moleculeKey] = similarity
+
+# get top 20 similar molecules
+top20 = sorted(similarities, key=similarities.get, reverse=True)[:20]
+
+# draw top20 similar molecules
+img = Draw.MolsToGridImage([molecules[x] for x in top20], molsPerRow=2, subImgSize=(400, 400),
+                           legends=["%s - %f" % (x, similarities[x]) for x in top20])
+img.save("similarities.png")
