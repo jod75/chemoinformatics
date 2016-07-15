@@ -30,10 +30,10 @@ def process_smiles_file(filename):
 # similarity test
 
 # download smiles file
-urllib.urlretrieve("http://files.docking.org/2D/AA/AAAA.smi", "AAAA.smi")
+urllib.urlretrieve("http://files.docking.org/2D/AA/AAAA.smi", "../data/AAAA.smi")
 
 # process file and create a list of Molecules
-molecules = process_smiles_file("AAAA.smi")
+molecules = process_smiles_file("../data/AAAA.smi")
 
 # use first molecule as query fingerprint
 fp_query = AllChem.GetMorganFingerprintAsBitVect(molecules[molecules.keys()[0]], 2)
@@ -49,8 +49,18 @@ for moleculeKey in molecules.keys():
 
 # get top 20 similar molecules
 top20 = sorted(similarities, key=similarities.get, reverse=True)[:20]
+top20.insert(0, molecules.keys()[0])  # this is the query molecule
+
+# get bottom 20 similar molecules
+bottom20 = sorted(similarities, key=similarities.get, reverse=False)[:20]
+bottom20.insert(0, molecules.keys()[0])  # this is the query molecule
 
 # draw top20 similar molecules
 img = Draw.MolsToGridImage([molecules[x] for x in top20], molsPerRow=2, subImgSize=(400, 400),
                            legends=["%s - %f" % (x, similarities[x]) for x in top20])
-img.save("similarities.png")
+img.save("../out/similarities_top20.png")
+
+# draw bottom20 similar molecules
+img = Draw.MolsToGridImage([molecules[x] for x in bottom20], molsPerRow=2, subImgSize=(400, 400),
+                           legends=["%s - %f" % (x, similarities[x]) for x in bottom20])
+img.save("../out/similarities_bottom20.png")
