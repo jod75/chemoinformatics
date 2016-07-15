@@ -3,6 +3,7 @@
 ###############################################################################
 # Tanimoto Similarity test using RDKit and Zinc15 database
 # Joseph D'Emanuele
+#
 
 import urllib
 from rdkit import Chem
