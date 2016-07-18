@@ -6,6 +6,7 @@
 #
 
 import urllib
+import os
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
@@ -29,6 +30,13 @@ def process_smiles_file(filename):
 
 ###############################################################################
 # similarity test
+
+###############################################################################
+# create folders if necessary
+if not os.path.exists("../data"):
+    os.makedirs("../data")
+if not os.path.exists("../out"):
+    os.makedirs("../out")
 
 # download smiles file
 urllib.urlretrieve("http://files.docking.org/2D/AA/AAAA.smi", "../data/AAAA.smi")
